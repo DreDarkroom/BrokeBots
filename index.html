@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0707">
+  <meta name="description" content="BROKEBOTS — a Darklabs bot behaviour experiment. Two broken machines, one very simple game.">
+  <title>BROKEBOTS — Darklabs Bot Behaviour Experiment</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23140a0a'/%3E%3Crect x='5' y='8' width='22' height='16' rx='2' fill='%23690000'/%3E%3Ccircle cx='12' cy='16' r='3' fill='%23e8b04a'/%3E%3Crect x='18' y='14' width='5' height='4' fill='%23f0e8d8'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="viewport">
+    <div id="cabinet" aria-label="BrokeBots test chamber">
+
+      <!-- ============ HEADER / HUD ============ -->
+      <header id="hud">
+        <div class="hud-side hud-left">
+          <div class="bot-tag old">
+            <span class="tag-model">DL-1951 · ANALOGUE</span>
+            <span class="tag-name">OSSIE</span>
+            <span class="tag-role" id="roleL">PLAYER 1</span>
+          </div>
+          <div class="score" id="scoreL" aria-live="polite">0</div>
+        </div>
+
+        <div class="hud-center">
+          <div class="hud-title">BROKEBOTS</div>
+          <div class="hud-sub">BOT TEST CHAMBER · BAY 01</div>
+          <div class="hud-buttons">
+            <button class="hud-btn" id="btnPause" type="button" aria-label="Pause">II</button>
+            <button class="hud-btn" id="btnMute" type="button" aria-label="Mute sound">SND</button>
+          </div>
+        </div>
+
+        <div class="hud-side hud-right">
+          <div class="score" id="scoreR" aria-live="polite">0</div>
+          <div class="bot-tag new">
+            <span class="tag-model">DL-2031 · DIGITAL</span>
+            <span class="tag-name">LUMA-9</span>
+            <span class="tag-role" id="roleR">PLAYER 2</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- ============ STAGE (logical 1200 x 675) ============ -->
+      <div id="stageFrame">
+        <span class="rivet r1"></span><span class="rivet r2"></span>
+        <span class="rivet r3"></span><span class="rivet r4"></span>
+        <div id="stage">
+          <canvas id="arena" width="1200" height="675"></canvas>
+
+          <!-- Bot layer: absolutely positioned SVG machines, aligned to the logical coordinate system -->
+          <div id="botLayer">
+            <div class="bot" id="botL"></div>
+            <div class="bot" id="botR"></div>
+          </div>
+
+          <!-- CRT presentation overlays (CSS only, non-interactive) -->
+          <div class="crt crt-scan" aria-hidden="true"></div>
+          <div class="crt crt-vignette" aria-hidden="true"></div>
+          <div class="crt crt-flicker" aria-hidden="true"></div>
+
+          <!-- Flash text in the arena (serve / point messages) -->
+          <div id="banner" aria-live="polite"></div>
+
+          <!-- ============ SCREENS ============ -->
+          <section class="screen" id="scrBoot" data-active="1">
+            <div class="panel boot">
+              <div class="brand-mark">DARKLABS</div>
+              <h1 class="title">BROKE<span>BOTS</span></h1>
+              <p class="subtitle">DARKLABS BOT BEHAVIOUR EXPERIMENT</p>
+              <div class="boot-log" id="bootLog">
+                <div>&gt; CHAMBER POWER ........ STANDBY</div>
+                <div>&gt; SUBJECT OSSIE ........ DETECTED (MOSTLY)</div>
+                <div>&gt; SUBJECT LUMA-9 ....... DETECTED (ANXIOUS)</div>
+              </div>
+              <button class="btn big" id="btnPower" type="button">POWER ON</button>
+              <p class="hint">PRESS ANY KEY OR TAP TO ENGAGE</p>
+            </div>
+          </section>
+
+          <section class="screen" id="scrMenu">
+            <div class="panel menu">
+              <div class="brand-mark">DARKLABS</div>
+              <h1 class="title">BROKE<span>BOTS</span></h1>
+              <p class="subtitle">DARKLABS BOT BEHAVIOUR EXPERIMENT</p>
+
+              <div class="menu-rows" id="menuRows">
+                <div class="row" data-row="mode">
+                  <span class="row-label">MODE</span>
+                  <div class="opts">
+                    <button type="button" class="opt" data-val="1p">SINGLE PLAYER</button>
+                    <button type="button" class="opt" data-val="2p">TWO PLAYER</button>
+                  </div>
+                </div>
+                <div class="row" data-row="pilot">
+                  <span class="row-label">YOUR BOT</span>
+                  <div class="opts">
+                    <button type="button" class="opt" data-val="L">OSSIE · OLD</button>
+                    <button type="button" class="opt" data-val="R">LUMA-9 · NEW</button>
+                  </div>
+                </div>
+                <div class="row" data-row="diff">
+                  <span class="row-label">DIFFICULTY</span>
+                  <div class="opts">
+                    <button type="button" class="opt" data-val="easy">EASY</button>
+                    <button type="button" class="opt" data-val="normal">NORMAL</button>
+                    <button type="button" class="opt" data-val="hard">HARD</button>
+                  </div>
+                </div>
+                <div class="row" data-row="target">
+                  <span class="row-label">FIRST TO</span>
+                  <div class="opts">
+                    <button type="button" class="opt" data-val="5">5</button>
+                    <button type="button" class="opt" data-val="7">7</button>
+                    <button type="button" class="opt" data-val="11">11</button>
+                  </div>
+                </div>
+                <div class="row row-actions" data-row="actions">
+                  <button type="button" class="btn" id="btnControls">CONTROLS</button>
+                  <button type="button" class="btn primary" id="btnStart">START</button>
+                </div>
+              </div>
+              <p class="hint menu-hint">↑↓ SELECT · ←→ CHANGE · ENTER START</p>
+            </div>
+          </section>
+
+          <section class="screen" id="scrControls">
+            <div class="panel controls">
+              <h2 class="panel-title">CONTROL SCHEMATIC</h2>
+              <div class="ctrl-grid">
+                <div class="ctrl-col">
+                  <div class="ctrl-head old">OSSIE · LEFT</div>
+                  <div class="keys"><kbd>W</kbd> UP</div>
+                  <div class="keys"><kbd>S</kbd> DOWN</div>
+                </div>
+                <div class="ctrl-col">
+                  <div class="ctrl-head new">LUMA-9 · RIGHT</div>
+                  <div class="keys"><kbd>↑</kbd> UP</div>
+                  <div class="keys"><kbd>↓</kbd> DOWN</div>
+                </div>
+                <div class="ctrl-col">
+                  <div class="ctrl-head">CHAMBER</div>
+                  <div class="keys"><kbd>SPACE</kbd> PAUSE</div>
+                  <div class="keys"><kbd>ENTER</kbd> CONFIRM</div>
+                  <div class="keys"><kbd>ESC</kbd> MENU</div>
+                  <div class="keys"><kbd>R</kbd> RESTART</div>
+                  <div class="keys"><kbd>M</kbd> MUTE</div>
+                </div>
+              </div>
+              <p class="ctrl-note">SINGLE PLAYER: EITHER KEY SET DRIVES YOUR BOT.<br>
+                TOUCH: DRAG ANYWHERE TO STEER. TWO PLAYER TOUCH: LEFT HALF / RIGHT HALF OF THE SCREEN.</p>
+              <button type="button" class="btn primary" id="btnControlsBack">BACK</button>
+            </div>
+          </section>
+
+          <section class="screen" id="scrPause">
+            <div class="panel small">
+              <h2 class="panel-title blink-slow">PAUSED</h2>
+              <p class="subtitle">SUBJECTS HELD IN SAFE STATE</p>
+              <div class="stack">
+                <button type="button" class="btn primary" id="btnResume">RESUME</button>
+                <button type="button" class="btn" id="btnRestart">RESTART</button>
+                <button type="button" class="btn" id="btnPauseMenu">MAIN MENU</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="screen" id="scrOver">
+            <div class="panel small">
+              <p class="subtitle">EXPERIMENT CONCLUDED</p>
+              <h2 class="panel-title" id="overTitle">OSSIE WINS</h2>
+              <div class="final-score" id="overScore">7 — 3</div>
+              <p class="over-note" id="overNote"></p>
+              <div class="stack">
+                <button type="button" class="btn primary" id="btnRematch">REMATCH</button>
+                <button type="button" class="btn" id="btnOverMenu">MAIN MENU</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- ============ FOOTER / DIAGNOSTICS ============ -->
+      <footer id="diag">
+        <span class="lamp" id="lampL"></span>
+        <span class="diag-text" id="diagL">OSSIE · SERVO 64°C · BOLTS 6/6</span>
+        <span class="diag-mid" id="diagMid">BALL 000 u/s · RALLY 00</span>
+        <span class="diag-text right" id="diagR">LUMA-9 · CPU 12% · ERR 0</span>
+        <span class="lamp" id="lampR"></span>
+      </footer>
+      <div class="maker">A DREDARKROOM / DARKLABS EXPERIMENT</div>
+    </div>
+  </div>
+
+  <div id="rotateHint" aria-hidden="true">ROTATE FOR THE FULL TEST CHAMBER · DRAG ANYWHERE TO STEER</div>
+
+  <script src="js/config.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/physics.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/bots.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
