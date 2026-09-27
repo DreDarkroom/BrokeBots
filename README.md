@@ -2,7 +2,7 @@
 
 **DARKLABS BOT BEHAVIOUR EXPERIMENT**
 
-Play it: **https://dredarkroom.github.io/brokebots/**
+Play it: **https://dredarkroom.github.io/BrokeBots/**
 
 BrokeBots is a browser-game experiment from DreDarkroom / Darklabs. It puts two
 over-engineered, malfunctioning robots in a very simple competitive environment
